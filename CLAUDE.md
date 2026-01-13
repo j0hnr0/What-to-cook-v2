@@ -28,8 +28,9 @@ npm run lint         # Run ESLint
 ### Project Structure
 - `app/` - Next.js App Router directory containing pages and layouts
   - `layout.js` - Root layout with Libre Baskerville + DM Sans fonts configured
-  - `page.js` - Recipe finder component with ingredient input and results display
-  - `api/recipes/route.js` - Next.js API route for Spoonacular integration
+  - `(home)/` - Route group for home page (parentheses don't affect URL structure)
+    - `page.js` - Recipe finder component with ingredient input and results display
+    - `api/recipes/route.js` - Next.js API route for Spoonacular integration
   - `globals.css` - Design system with cream/terracotta color palette and animations
 - `public/` - Static assets (SVG files for UI icons)
 - Path alias `@/*` configured in jsconfig.json to reference root directory
@@ -87,9 +88,9 @@ npm run lint         # Run ESLint
   - Mixed formats supported
 
 ### Current Architecture
-- **Single page component** (`app/page.js`) with React state management
+- **Single page component** (`app/(home)/page.js`) with React state management
 - **Client-side interactivity** using 'use client' directive
-- **Next.js API Route** (`app/api/recipes/route.js`) - Backend API integration with Spoonacular
+- **Next.js API Route** (`app/(home)/api/recipes/route.js`) - Backend API integration with Spoonacular
 - **Ingredient Parsing** - Frontend parses both space and comma-separated input
 - **Environment Variables** - API key stored in SPOONCULAR_API_KEY
 - **Responsive grid layout** - 2 columns on desktop, 1 column on mobile
