@@ -8,36 +8,19 @@ export default function Home() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [error, setError] = useState(null);
   const resultsRef = useRef(null);
 
-  const mockRecipes = [
-    {
-      id: 1,
-      name: "Classic Chicken Tomato Basil",
-      image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400&h=400&fit=crop",
-      usedIngredients: ["chicken", "tomatoes", "basil"],
-      missedIngredients: ["olive oil", "garlic"],
-      unusedIngredients: []
-    },
-    {
-      id: 2,
-      name: "Mediterranean Garlic Chicken",
-      image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=400&fit=crop",
-      usedIngredients: ["chicken", "garlic", "tomatoes"],
-      missedIngredients: ["lemon", "oregano"],
-      unusedIngredients: ["basil"]
-    },
-    {
-      id: 3,
-      name: "Quick Tomato Basil Pasta",
-      image: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop",
-      usedIngredients: ["tomatoes", "basil", "garlic"],
-      missedIngredients: ["pasta", "parmesan"],
-      unusedIngredients: ["chicken"]
-    }
-  ];
+  const parseIngredients = (input) => {
+    // Split by comma first, then by spaces
+    return input
+      .split(',')
+      .flatMap(part => part.trim().split(/\s+/))
+      .filter(ingredient => ingredient.length > 0)
+      .join(',');
+  };
 
-  const handleFindRecipes = () => {
+  const handleFindRecipes = async () => {
     const trimmedIngredients = ingredients.trim();
 
     if (!trimmedIngredients) {
@@ -45,19 +28,43 @@ export default function Home() {
       return;
     }
 
-    setLoading(true);
+    // Parse ingredients to handle both comma and space separation
+    const parsedIngredients = parseIngredients(trimmedIngredients);
 
-    // Simulate API call
-    setTimeout(() => {
-      setRecipes(mockRecipes);
-      setLoading(false);
+    setLoading(true);
+    setError(null);
+    setShowResults(false);
+
+    try {
+      // Call our Next.js API route
+      const response = await fetch(
+        `/api/recipes?ingredients=${encodeURIComponent(parsedIngredients)}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch recipes');
+      }
+
+      const data = await response.json();
+      setRecipes(data);
       setShowResults(true);
 
       // Smooth scroll to results
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        resultsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
       }, 100);
-    }, 1500);
+
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+      setRecipes([]);
+      setShowResults(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -101,7 +108,7 @@ export default function Home() {
                 value={ingredients}
                 onChange={(e) => setIngredients(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Enter ingredients separated by commas&#10;e.g., chicken, tomatoes, basil, garlic"
+                placeholder="Enter ingredients separated by commas or spaces&#10;e.g., chicken tomatoes basil OR chicken, tomatoes, basil"
                 className="w-full px-5 py-4 text-base border-2 rounded-xl min-h-[120px] resize-y transition-all duration-300 focus:outline-none"
                 style={{
                   borderColor: 'var(--color-border)',
@@ -176,8 +183,32 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Error Display */}
+        {showResults && error && (
+          <div
+            className="bg-white rounded-2xl p-10 sm:p-12 border mb-8 animate-[fadeIn_0.6s_ease-out]"
+            style={{
+              boxShadow: 'var(--shadow-lg)',
+              borderColor: 'var(--color-border)'
+            }}
+          >
+            <div className="text-center py-8">
+              <div className="text-5xl mb-4">⚠️</div>
+              <h3
+                className="font-serif text-2xl mb-3 text-red-600"
+                style={{ fontFamily: 'var(--font-libre-baskerville)' }}
+              >
+                Error
+              </h3>
+              <p className="text-base" style={{ color: 'var(--color-text-muted)' }}>
+                {error}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Results Card */}
-        {showResults && (
+        {showResults && !error && (
           <div
             ref={resultsRef}
             className="bg-white rounded-2xl p-10 sm:p-12 border animate-[fadeIn_0.6s_ease-out]"
@@ -233,7 +264,6 @@ export default function Home() {
                       height={400}
                       className="w-full sm:w-[180px] h-48 sm:h-[180px] object-cover rounded-lg"
                       style={{ backgroundColor: 'var(--color-border)' }}
-                      unoptimized
                     />
                     <div className="flex flex-col">
                       <h3 className="text-xl font-semibold mb-4 leading-tight">

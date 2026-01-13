@@ -29,6 +29,7 @@ npm run lint         # Run ESLint
 - `app/` - Next.js App Router directory containing pages and layouts
   - `layout.js` - Root layout with Libre Baskerville + DM Sans fonts configured
   - `page.js` - Recipe finder component with ingredient input and results display
+  - `api/recipes/route.js` - Next.js API route for Spoonacular integration
   - `globals.css` - Design system with cream/terracotta color palette and animations
 - `public/` - Static assets (SVG files for UI icons)
 - Path alias `@/*` configured in jsconfig.json to reference root directory
@@ -79,12 +80,18 @@ npm run lint         # Run ESLint
   - Unused ingredients (gray)
 ✅ Smooth animations and hover effects
 ✅ Fully responsive design (mobile/tablet/desktop)
-✅ Mock data integration (3 sample recipes)
+✅ Spoonacular API integration with real recipe data
+✅ Support for space-separated AND comma-separated ingredient input
+  - "fish egg" works (space-separated)
+  - "fish, egg" works (comma-separated)
+  - Mixed formats supported
 
 ### Current Architecture
 - **Single page component** (`app/page.js`) with React state management
 - **Client-side interactivity** using 'use client' directive
-- **Mock API simulation** with 1.5s setTimeout
+- **Next.js API Route** (`app/api/recipes/route.js`) - Backend API integration with Spoonacular
+- **Ingredient Parsing** - Frontend parses both space and comma-separated input
+- **Environment Variables** - API key stored in SPOONCULAR_API_KEY
 - **Responsive grid layout** - 2 columns on desktop, 1 column on mobile
 
 ### Implementation Steps Taken
@@ -100,8 +107,8 @@ npm run lint         # Run ESLint
 6. **Image Optimization** - Used Next.js Image component with Unsplash images
 
 ### Next Steps (Not Yet Implemented)
-- [ ] Replace mock data with real recipe API (Spoonacular, TheMealDB, etc.)
-- [ ] Add API key configuration
+- [x] Replace mock data with real recipe API (Spoonacular)
+- [x] Add API key configuration (SPOONCULAR_API_KEY env var)
 - [ ] Implement advanced filtering (dietary restrictions, cuisine types)
 - [ ] Add recipe detail modal with full instructions
 - [ ] Add favorites/save functionality
